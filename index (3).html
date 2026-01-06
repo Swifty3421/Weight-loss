@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Weight Loss">
+  <meta name="theme-color" content="#6366f1">
+  
+  <title>Weight Loss Journey - David & Amanda</title>
+  
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+const { useState, useEffect } = React;
+const { Heart, Calendar, TrendingDown, Camera, Dumbbell, Utensils, CheckCircle, Activity, BarChart3, Scale, Target } = lucide;
+
+// Beach image embedded
+const BEACH_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+
+const WeightLossJourney = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeUser, setActiveUser] = useState('david');
+  const [loading, setLoading] = useState(true);
+  
+  const HOLIDAY_DATE = new Date('2026-05-14');
+  const today = new Date();
+  const daysToHoliday = Math.ceil((HOLIDAY_DATE - today) / (1000 * 60 * 60 * 24));
+  
+  const START_DATE = new Date('2026-01-03');
+  const totalWeeks = 19;
+  const weekNumber = Math.min(Math.ceil((today - START_DATE) / (1000 * 60 * 60 * 24 * 7)), totalWeeks);
+
+  const [userData, setUserData] = useState({
+    david: {
+      name: 'David',
+      startWeight: 283,
+      currentWeight: 283,
+      targetWeight: 231,
+      holidayTarget: 231,
+      finalTarget: 210,
+      calorieTarget: 1700,
+      proteinTarget: 180,
+      dailyLogs: [],
+      photos: []
+    },
+    amanda: {
+      name: 'Amanda',
+      startWeight: 0,
+      currentWeight: 0,
+      targetWeight: 0,
+      holidayTarget: 0,
+      finalTarget: 0,
+      calorieTarget: 1400,
+      proteinTarget: 120,
+      dailyLogs: [],
+      photos: []
+    }
+  });
+
+  useEffect(() => {
+    const savedData = localStorage.getItem('weightLossData');
+    if (savedData) {
+      setUserData(JSON.parse(savedData));
+    }
+    setTimeout(() => setLoading(false), 500);
+  }, []);
+
+  const saveData = (newData) => {
+    setUserData(newData);
+    localStorage.setItem('weightLossData', JSON.stringify(newData));
+  };
+
+  const currentUser = userData[activeUser];
+
+  const addDailyLog = (type, data) => {
+    const newData = { ...userData };
+    newData[activeUser].dailyLogs.push({
+      date: new Date().toISOString(),
+      type,
+      ...data
+    });
+    saveData(newData);
+  };
+
+  const addPhoto = (photoData) => {
+    const newData = { ...userData };
+    newData[activeUser].photos.push({
+      date: new Date().toISOString(),
+      ...photoData
+    });
+    saveData(newData);
+  };
+
+  const updateWeight = (weight) => {
+    const newData = { ...userData };
+    newData[activeUser].currentWeight = weight;
+    addDailyLog('weight', { weight });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 flex items-center justify-center">
+        <Heart className="w-16 h-16 text-purple-600 animate-pulse" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute top-40 right-10 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-20 left-1/3 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
+      </div>
+
+      {/* Fixed Header */}
+      <div className="relative backdrop-blur-md bg-white/10 border-b border-white/20 shadow-2xl">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="relative">
+                <Heart className="w-8 h-8 sm:w-10 sm:h-10 text-pink-400 animate-pulse" fill="currentColor" />
+                <div className="absolute inset-0 bg-pink-400 rounded-full blur-xl opacity-50"></div>
+              </div>
+              <div>
+                <h1 className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">Weight Loss Journey</h1>
+                <p className="text-pink-200 text-xs sm:text-sm font-medium hidden sm:block">Transform your life 💪</p>
+              </div>
+            </div>
+            <div className="flex gap-2 sm:gap-3">
+              <button
+                onClick={() => setActiveUser('david')}
+                className={`px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-sm sm:text-base font-bold transition-all transform hover:scale-105 ${
+                  activeUser === 'david' 
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/50' 
+                    : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'
+                }`}
+              >
+                David
+              </button>
+              <button
+                onClick={() => setActiveUser('amanda')}
+                className={`px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-sm sm:text-base font-bold transition-all transform hover:scale-105 ${
+                  activeUser === 'amanda' 
+                    ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg shadow-pink-500/50' 
+                    : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'
+                }`}
+              >
+                Amanda
+              </button>
+            </div>
+          </div>
+
+          {/* Beach Holiday Countdown */}
+          <div className="relative rounded-xl sm:rounded-3xl overflow-hidden shadow-2xl h-48 sm:h-64 md:h-80 mb-4">
+            <div 
+              className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-blue-500"
+            >
+              <div className="absolute inset-0 bg-black/10"></div>
+            </div>
+            
+            <div className="absolute inset-0 flex items-center justify-center px-4">
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                  <Calendar className="w-5 h-5 sm:w-7 sm:h-7 text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" />
+                  <span className="font-bold text-lg sm:text-2xl text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]">Holiday Countdown</span>
+                </div>
+                <div className="text-6xl sm:text-8xl md:text-9xl font-extrabold mb-1 sm:mb-2 text-white drop-shadow-[0_6px_12px_rgba(0,0,0,0.9)]">{daysToHoliday}</div>
+                <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]">days until paradise</p>
+                <p className="text-base sm:text-xl text-white mt-1 sm:mt-2 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]">May 14th, 2026 🌴</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: BarChart3, color: 'from-blue-500 to-cyan-500' },
+              { id: 'bmi', label: 'BMI', icon: Activity, color: 'from-green-500 to-emerald-500' },
+              { id: 'photos', label: 'Photos', icon: Camera, color: 'from-pink-500 to-rose-500' },
+              { id: 'workouts', label: 'Workouts', icon: Dumbbell, color: 'from-orange-500 to-red-500' },
+              { id: 'meals', label: 'Meals', icon: Utensils, color: 'from-yellow-500 to-amber-500' },
+              { id: 'checkin', label: 'Check-In', icon: CheckCircle, color: 'from-purple-500 to-fuchsia-500' },
+              { id: 'progress', label: 'Progress', icon: TrendingDown, color: 'from-cyan-500 to-teal-500' }
+            ].map(tab => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm whitespace-nowrap transition-all ${
+                    activeTab === tab.id
+                      ? `bg-gradient-to-r ${tab.color} text-white shadow-lg`
+                      : 'bg-white/10 text-white/70 hover:bg-white/20'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="relative max-w-7xl mx-auto p-4">
+        {activeTab === 'dashboard' && <DashboardTab currentUser={currentUser} weekNumber={weekNumber} />}
+        {activeTab === 'bmi' && <BMITab currentUser={currentUser} />}
+        {activeTab === 'photos' && <PhotosTab currentUser={currentUser} addPhoto={addPhoto} />}
+        {activeTab === 'workouts' && <WorkoutsTab weekNumber={weekNumber} />}
+        {activeTab === 'meals' && <MealsTab currentUser={currentUser} />}
+        {activeTab === 'checkin' && <CheckInTab currentUser={currentUser} updateWeight={updateWeight} addDailyLog={addDailyLog} />}
+        {activeTab === 'progress' && <ProgressTab currentUser={currentUser} />}
+      </div>
+    </div>
+  );
+};
+
+// Dashboard Tab
+const DashboardTab = ({ currentUser, weekNumber }) => {
+  const todayLogs = currentUser.dailyLogs.filter(log => {
+    const logDate = new Date(log.date);
+    const today = new Date();
+    return logDate.toDateString() === today.toDateString();
+  });
+
+  const todayCalories = todayLogs.filter(l => l.type === 'meal').reduce((sum, l) => sum + (l.calories || 0), 0);
+  const todayProtein = todayLogs.filter(l => l.type === 'meal').reduce((sum, l) => sum + (l.protein || 0), 0);
+  const todaySteps = todayLogs.filter(l => l.type === 'steps').reduce((sum, l) => sum + (l.steps || 0), 0);
+
+  const calorieProgress = (todayCalories / currentUser.calorieTarget) * 100;
+  const proteinProgress = (todayProtein / currentUser.proteinTarget) * 100;
+  const stepsProgress = (todaySteps / 8000) * 100;
+
+  const weightLost = currentUser.startWeight - currentUser.currentWeight;
+  const weightToGo = currentUser.currentWeight - currentUser.holidayTarget;
+  const progressPercent = ((currentUser.startWeight - currentUser.currentWeight) / (currentUser.startWeight - currentUser.holidayTarget)) * 100;
+
+  return (
+    <div className="space-y-6">
+      {/* Progress Rings */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <ProgressRing label="Calories" value={todayCalories} target={currentUser.calorieTarget} unit="kcal" color="blue" progress={calorieProgress} />
+        <ProgressRing label="Protein" value={todayProtein} target={currentUser.proteinTarget} unit="g" color="green" progress={proteinProgress} />
+        <ProgressRing label="Steps" value={todaySteps} target={8000} unit="" color="purple" progress={stepsProgress} />
+      </div>
+
+      {/* Weight Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard label="Current" value={`${currentUser.currentWeight} lbs`} icon={Scale} color="blue" />
+        <StatCard label="Lost" value={`${weightLost.toFixed(1)} lbs`} icon={TrendingDown} color="green" />
+        <StatCard label="To Goal" value={`${weightToGo.toFixed(1)} lbs`} icon={Target} color="orange" />
+        <StatCard label="Week" value={`${weekNumber}/19`} icon={Calendar} color="purple" />
+      </div>
+    </div>
+  );
+};
+
+// Progress Ring Component
+const ProgressRing = ({ label, value, target, unit, color, progress }) => {
+  const clampedProgress = Math.min(progress, 100);
+  const circumference = 2 * Math.PI * 40;
+  const strokeDashoffset = circumference - (clampedProgress / 100) * circumference;
+
+  const colorClasses = {
+    blue: 'text-blue-400',
+    green: 'text-green-400',
+    purple: 'text-purple-400'
+  };
+
+  return (
+    <div className="backdrop-blur-md bg-white/10 rounded-2xl p-6 border border-white/20">
+      <div className="flex flex-col items-center">
+        <div className="relative w-32 h-32 mb-4">
+          <svg className="transform -rotate-90 w-32 h-32">
+            <circle cx="64" cy="64" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/10" />
+            <circle 
+              cx="64" 
+              cy="64" 
+              r="40" 
+              stroke="currentColor" 
+              strokeWidth="8" 
+              fill="transparent"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              className={`${colorClasses[color]} transition-all duration-1000`}
+              strokeLinecap="round"
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">{value}</div>
+              <div className="text-xs text-white/60">{unit}</div>
+            </div>
+          </div>
+        </div>
+        <div className="text-center">
+          <div className="text-lg font-semibold text-white">{label}</div>
+          <div className="text-sm text-white/60">Goal: {target}{unit}</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Stat Card Component
+const StatCard = ({ label, value, icon: Icon, color }) => {
+  const colorClasses = {
+    blue: 'from-blue-500/20 to-cyan-500/20 border-blue-400/30',
+    green: 'from-green-500/20 to-emerald-500/20 border-green-400/30',
+    orange: 'from-orange-500/20 to-red-500/20 border-orange-400/30',
+    purple: 'from-purple-500/20 to-fuchsia-500/20 border-purple-400/30'
+  };
+
+  return (
+    <div className={`backdrop-blur-md bg-gradient-to-br ${colorClasses[color]} rounded-xl p-4 border`}>
+      <div className="flex items-center gap-3">
+        <Icon className="w-8 h-8 text-white/80" />
+        <div>
+          <div className="text-sm text-white/60">{label}</div>
+          <div className="text-xl font-bold text-white">{value}</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// BMI Tab
+const BMITab = ({ currentUser }) => {
+  const height = 69; // 5'9" in inches
+  const currentBMI = (currentUser.currentWeight / (height * height)) * 703;
+  const targetBMI = (currentUser.holidayTarget / (height * height)) * 703;
+  
+  return (
+    <div className="space-y-6">
+      <div className="backdrop-blur-md bg-white/10 rounded-2xl p-6 border border-white/20">
+        <h2 className="text-2xl font-bold text-white mb-6">BMI Progress Tracker</h2>
+        
+        {/* Current BMI */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-white/80">Current BMI</span>
+            <span className="text-2xl font-bold text-white">{currentBMI.toFixed(1)}</span>
+          </div>
+          
+          {/* BMI Scale */}
+          <div className="relative h-12 rounded-full overflow-hidden flex">
+            <div className="flex-[37] bg-blue-400"></div>
+            <div className="flex-[13] bg-green-400"></div>
+            <div className="flex-[10] bg-yellow-400"></div>
+            <div className="flex-[40] bg-red-400"></div>
+          </div>
+          
+          {/* BMI Markers */}
+          <div className="relative mt-2">
+            <div className="absolute" style={{ left: `${(currentBMI / 50) * 100}%`, transform: 'translateX(-50%)' }}>
+              <div className="w-1 h-16 bg-white"></div>
+              <div className="text-xs text-white text-center mt-1 whitespace-nowrap">Current: {currentBMI.toFixed(1)}</div>
+            </div>
+            <div className="absolute" style={{ left: `${(targetBMI / 50) * 100}%`, transform: 'translateX(-50%)' }}>
+              <div className="w-1 h-24 bg-pink-400"></div>
+              <div className="text-xs text-pink-300 text-center mt-1 whitespace-nowrap">Goal: {targetBMI.toFixed(1)}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* BMI Categories */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
+          <div className="text-center">
+            <div className="w-full h-3 bg-blue-400 rounded-full mb-2"></div>
+            <div className="text-sm text-white">Underweight</div>
+            <div className="text-xs text-white/60">&lt; 18.5</div>
+          </div>
+          <div className="text-center">
+            <div className="w-full h-3 bg-green-400 rounded-full mb-2"></div>
+            <div className="text-sm text-white">Healthy</div>
+            <div className="text-xs text-white/60">18.5 - 24.9</div>
+          </div>
+          <div className="text-center">
+            <div className="w-full h-3 bg-yellow-400 rounded-full mb-2"></div>
+            <div className="text-sm text-white">Overweight</div>
+            <div className="text-xs text-white/60">25 - 29.9</div>
+          </div>
+          <div className="text-center">
+            <div className="w-full h-3 bg-red-400 rounded-full mb-2"></div>
+            <div className="text-sm text-white">Obese</div>
+            <div className="text-xs text-white/60">≥ 30</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Placeholder tabs
+const PhotosTab = () => <PlaceholderTab title="Photos" icon={Camera} />;
+const WorkoutsTab = () => <PlaceholderTab title="Workouts" icon={Dumbbell} />;
+const MealsTab = () => <PlaceholderTab title="Meals" icon={Utensils} />;
+const CheckInTab = () => <PlaceholderTab title="Check-In" icon={CheckCircle} />;
+const ProgressTab = () => <PlaceholderTab title="Progress" icon={TrendingDown} />;
+
+const PlaceholderTab = ({ title, icon: Icon }) => (
+  <div className="backdrop-blur-md bg-white/10 rounded-2xl p-12 border border-white/20 text-center">
+    <Icon className="w-16 h-16 text-white/40 mx-auto mb-4" />
+    <h2 className="text-2xl font-bold text-white mb-2">{title}</h2>
+    <p className="text-white/60">Content coming soon...</p>
+  </div>
+);
+
+// Render
+ReactDOM.render(<WeightLossJourney />, document.getElementById('root'));
+  </script>
+</body>
+</html>
